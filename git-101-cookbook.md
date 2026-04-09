@@ -1,145 +1,73 @@
-# Git 101 Cookbook (OCNG 489/689)
+# Git Cookbook (OCNG 489/689)
 
-This cookbook uses the class repository as the running example:
+## Workflow
 
-`git@github.com:odsl/ocng-489-689-2026-spring.git`
+1. Generate SSH key and add it to GitHub
+2. Fork the class repo
+3. Clone your fork
+4. Add a file, commit, and push to your fork
+5. Open a pull request
+6. Pull to sync
 
-## 0) What Git Is
+---
 
-- `git` tracks file history in a local repository.
-- `GitHub` hosts remote repositories and pull requests.
-- A **commit** is a snapshot with a message.
-- A **branch** is a movable pointer to commits.
-- A **remote** is a named link to another repo (`origin`, `upstream`).
+## 1. Set up SSH
 
-## 1) One-Time Setup
-
-Check your Git install:
+Generate a key:
 
 ```bash
-git --version
+ssh-keygen -t ed25519 -C "your_email@example.com"
 ```
 
-Set your identity (used in commit history):
+Press Enter for the defaults.
+
+Show your public key:
 
 ```bash
-git config --global user.name "Your Name"
-git config --global user.email "your_email@example.com"
+cat ~/.ssh/id_ed25519.pub
 ```
 
-Optional quality-of-life defaults:
+Copy that output.
+
+On GitHub:
+
+* go to **Settings**
+* go to **SSH and GPG keys**
+* click **New SSH key**
+* paste the key and save
+
+Test the connection:
 
 ```bash
-git config --global init.defaultBranch main
-git config --global pull.rebase false
-git config --global core.editor "code --wait"   # or nano, vim, etc.
+ssh -T git@github.com
 ```
 
-## 2) Clone the Class Repo
+---
 
-```bash
-git clone git@github.com:odsl/ocng-489-689-2026-spring.git
-cd ocng-489-689-2026-spring
+## 2. Fork the class repository
+
+Open the class repo in GitHub:
+
+```text
+https://github.com/odsl/ocng-489-689-2026-spring
 ```
 
-Inspect repository state:
+Click **Fork**.
 
-```bash
-git status
-git branch -a
-git remote -v
+This creates your own copy, for example:
+
+```text
+https://github.com/YOUR_USERNAME/ocng-489-689-2026-spring
 ```
 
-## 3) Daily Core Commands (Local Work)
+---
 
-See changed files:
+## 3. Clone your fork
 
-```bash
-git status
-```
-
-See exact line changes:
+Clone your own fork, not the main class repo:
 
 ```bash
-git diff
-```
-
-Stage files:
-
-```bash
-git add path/to/file
-git add .   # stage all tracked/untracked changes in current dir
-```
-
-Commit:
-
-```bash
-git commit -m "Add intro notes for Week 3"
-```
-
-Read history:
-
-```bash
-git log --oneline --graph --decorate -n 20
-```
-
-## 4) Branching Basics
-
-Create and switch to a branch:
-
-```bash
-git switch -c yourname/topic-short-name
-```
-
-Switch branches:
-
-```bash
-git switch main
-git switch yourname/topic-short-name
-```
-
-Delete a fully merged branch:
-
-```bash
-git branch -d yourname/topic-short-name
-```
-
-## 5) Push and Pull
-
-Push your branch to remote:
-
-```bash
-git push -u origin yourname/topic-short-name
-```
-
-Later pushes on same branch:
-
-```bash
-git push
-```
-
-Update local `main` from remote:
-
-```bash
-git switch main
-git pull origin main
-```
-
-## 6) Fork Workflow (Typical Student Workflow)
-
-Use this when you do **not** have direct write access to `odsl/ocng-489-689-2026-spring`.
-
-### Step A: Fork on GitHub
-
-1. Open `https://github.com/odsl/ocng-489-689-2026-spring`.
-2. Click **Fork** (creates `yourusername/ocng-489-689-2026-spring`).
-
-### Step B: Clone Your Fork and Add Upstream
-
-Clone your fork:
-
-```bash
-git clone git@github.com:yourusername/ocng-489-689-2026-spring.git
+git clone git@github.com:YOUR_USERNAME/ocng-489-689-2026-spring.git
 cd ocng-489-689-2026-spring
 ```
 
@@ -147,189 +75,111 @@ Add the class repo as `upstream`:
 
 ```bash
 git remote add upstream git@github.com:odsl/ocng-489-689-2026-spring.git
+```
+
+Check remotes:
+
+```bash
 git remote -v
 ```
 
-Expected remote pattern:
+You should see:
 
-- `origin` -> your fork
-- `upstream` -> class repo
-
-### Step C: Create Feature Branch, Commit, Push
-
-```bash
-git switch -c yourname/lab1-fix
-# edit files
-git add .
-git commit -m "Fix typo in lab instructions"
-git push -u origin yourname/lab1-fix
-```
-
-### Step D: Open Pull Request (PR)
-
-On GitHub:
-
-1. Open your fork branch.
-2. Click **Compare & pull request**.
-3. Base repo: `odsl/ocng-489-689-2026-spring`
-4. Base branch: usually `main`
-5. Fill title/description, submit PR.
-
-## 7) Keep Your Fork Synced
-
-Do this regularly before new work:
-
-```bash
-git switch main
-git fetch upstream
-git merge upstream/main
-git push origin main
-```
-
-Then branch from updated `main`:
-
-```bash
-git switch -c yourname/new-task
-```
-
-## 8) Team Project Workflow (Recommended)
-
-For team repos, avoid committing directly to `main`.
-
-### Team Rules
-
-- Protect `main` (require PR + at least 1 review).
-- Use short-lived feature branches.
-- Keep PRs small (one topic per PR).
-- Merge only when CI/tests pass (if configured).
-
-### Daily Team Flow
-
-1. Update local main:
-
-```bash
-git switch main
-git pull origin main
-```
-
-2. Create branch:
-
-```bash
-git switch -c teamname/feature-brief-name
-```
-
-3. Work and commit in logical chunks:
-
-```bash
-git add .
-git commit -m "Implement parser for CTD metadata"
-```
-
-4. Push and open PR:
-
-```bash
-git push -u origin teamname/feature-brief-name
-```
-
-5. Address review comments with new commits; push again.
-6. Merge PR on GitHub.
-7. Delete merged branch (remote and local) to keep repo clean.
-
-## 9) Resolve Merge Conflicts (Basic)
-
-If conflict occurs during merge/pull:
-
-```bash
-git status
-```
-
-Open conflicted file and find markers:
-
-```text
-<<<<<<< HEAD
-your version
-=======
-incoming version
->>>>>>> branch-name
-```
-
-Edit to desired final content, then:
-
-```bash
-git add path/to/conflicted-file
-git commit
-```
-
-If conflict happened in a PR branch, push the resolved commit:
-
-```bash
-git push
-```
-
-## 10) Undo and Recovery (Safe Essentials)
-
-Unstage file (keep edits):
-
-```bash
-git restore --staged path/to/file
-```
-
-Discard local unstaged edits in one file:
-
-```bash
-git restore path/to/file
-```
-
-See where `HEAD` moved recently:
-
-```bash
-git reflog -n 20
-```
-
-## 11) Practical Commit Message Pattern
-
-Use present-tense, specific subjects:
-
-- `Add Week 5 plotting example`
-- `Fix wrong units in salinity calculation`
-- `Refactor notebook setup for reproducibility`
-
-Good pattern:
-
-`<Verb> <what changed> [optional context]`
-
-## 12) Quick Command Cheat Sheet
-
-```bash
-git status
-git diff
-git add .
-git commit -m "Message"
-git switch -c my/branch
-git switch main
-git pull origin main
-git push -u origin my/branch
-git fetch upstream
-git merge upstream/main
-git log --oneline --graph --decorate -n 20
-```
-
-## 13) Suggested Classroom Policy
-
-- Every assignment update should come through a PR.
-- No force-push to shared `main`.
-- PR title should include team name and task.
-- At least one teammate review before merge.
-- Resolve conflicts in your branch, not in `main`.
+* `origin` = your fork
+* `upstream` = class repo
 
 ---
 
-If you are new to Git, focus on this loop first:
+## 4. Add a file, commit, and push
 
-1. `pull main`
-2. `create branch`
-3. `edit + commit`
-4. `push`
-5. `open PR`
-6. `merge after review`
+Create a file:
 
+```bash
+echo "My first contribution" > test.txt
+```
+
+Check status:
+
+```bash
+git status
+```
+
+Stage the file:
+
+```bash
+git add test.txt
+```
+
+Commit:
+
+```bash
+git commit -m "Add test file"
+```
+
+Push to your fork:
+
+```bash
+git push origin main
+```
+
+---
+
+## 5. Open a pull request
+
+On GitHub:
+
+* open your fork
+* click **Contribute**
+* click **Open pull request**
+
+Make sure:
+
+* base repository = `odsl/ocng-489-689-2026-spring`
+* base branch = `main`
+* head repository = your fork
+* compare branch = `main`
+
+Then submit the pull request.
+
+---
+
+## 6. Sync your fork
+
+After the class repo changes, sync your local copy.
+
+First get changes from the class repo:
+
+```bash
+git pull upstream main
+```
+
+Then push the updated version to your fork:
+
+```bash
+git push origin main
+```
+
+---
+
+## Minimal command list
+
+```bash
+ssh-keygen -t ed25519 -C "your_email@example.com"
+cat ~/.ssh/id_ed25519.pub
+ssh -T git@github.com
+
+git clone git@github.com:YOUR_USERNAME/ocng-489-689-2026-spring.git
+cd ocng-489-689-2026-spring
+git remote add upstream git@github.com:odsl/ocng-489-689-2026-spring.git
+
+echo "My first contribution" > test.txt
+git add test.txt
+git commit -m "Add test file"
+git push origin main
+
+git pull upstream main
+git push origin main
+```
+
+
+> Edit locally, commit to your fork, push to GitHub, open a pull request, then sync from upstream.
